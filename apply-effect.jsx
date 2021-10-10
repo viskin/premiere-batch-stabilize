@@ -14,6 +14,7 @@ app.enableQE()
 
 var project = app.project
 var projectItems = app.getCurrentProjectViewSelection()
+
 for (var i = 0; i < projectItems.length; i++) {
     var projectItem = projectItems[i];
 
