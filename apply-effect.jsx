@@ -1,4 +1,4 @@
-// Apply filter
+// Apply effect
 // https://ppro-scripting.docsforadobe.dev/
 // qe.reflect.methods
 // qe.reflect.properties
