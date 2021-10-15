@@ -42,12 +42,14 @@ for (var i = 0; i < projectItems.length; i++) {
 
         //app.encoder.exportWithPresetObject(encoderPreset, sequence)
 
+        var inputPath = clip.projectItem.getMediaPath();
         var outputPath = outputDirectory.fsName + "\\" + clip.name;
 
         //  sequence.exportAsMediaDirect(outputPath,
         //     encoderPresetFile.fsName,
         //      app.encoder.ENCODE_ENTIRE);
 
+        app.encoder.bind('onEncoderJobComplete', function (jobID, outputFilePath) { onEncoderJobComplete2(jobID, outputFilePath, inputPath) });
         app.encoder.bind('onEncoderJobQueued', onEncoderJobQueued);
         app.encoder.bind('onEncoderJobError', onEncoderJobError);
 
@@ -82,6 +84,11 @@ function onEncoderJobQueued (jobID) {
     //app.encoder.startBatch();
 }
 
+// onEncoderJobComplete with inputPath parameter
+function onEncoderJobComplete2(jobID, outputFilePath, inputPath) {
+    copyMetadata(inputPath, outputFilePath);
+}
+
 function onEncoderJobError (jobID, errorMessage) {
     var eoName; 
 
@@ -97,4 +104,41 @@ function onEncoderJobError (jobID, errorMessage) {
     eventObj.type	= "com.adobe.csxs.events.PProPanelRenderEvent";
     eventObj.data	= "Job " + jobID + " failed, due to " + errorMessage + ".";
     eventObj.dispatch();
+}
+
+function run(cmd) {
+    var f = new File(Folder.temp.fsName + "\\premiererun-" + generateJsUUID() + ".bat");
+    f.encoding = "UTF8";
+    f.open("w");
+    f.writeln("chcp 65001\n" + cmd /*+ "\npause"*/);
+    f.close();
+    f.execute();
+    //f.remove();
+}
+
+// JS - Generate Global Random Unique Number
+function generateJsUUID(){
+    var dt = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (dt + Math.random()*16)%16 | 0;
+        dt = Math.floor(dt/16);
+        return (c=='x' ? r :(r&0x3|0x8)).toString(16);
+    });
+    return uuid;
+}
+
+// args should be separated with \n
+function runExifTool(args) {
+    var f = new File(Folder.temp.fsName + "\\premiererunargs-" + generateJsUUID() + ".txt");
+    f.encoding = "UTF8";
+    f.open("w");
+    f.writeln(args);
+    f.close();
+    run("exiftool -@ " + f.fsName)
+}
+
+// supports unicode filenames
+function copyMetadata(source, target) {
+    //run("exiftool -tagsfromfile \"" + source + "\" \"" + target + "\" -overwrite_original -charset filename=utf8");
+    runExifTool("-tagsfromfile\n" + source + "\n" + target + "\n-overwrite_original\n-charset\nfilename=utf8")
 }
