@@ -10,10 +10,18 @@
 
 var effectName = "Warp Stabilizer" // Sadly cannot be a preset name
 
+app.setSDKEventMessage("hello", "info");
+
 app.enableQE()
 
 var project = app.project
 var projectItems = app.getCurrentProjectViewSelection()
+
+var colorLabelEffectAdded = 7; // dark yellow
+var colorLabelEffectConfigured = 12; // biege
+var colorLabelEffectAnalyzed = 10; // dark green
+
+if (!projectItems) throw "Please select some sequences"
 
 for (var i = 0; i < projectItems.length; i++) {
     var projectItem = projectItems[i];
@@ -21,34 +29,37 @@ for (var i = 0; i < projectItems.length; i++) {
     if (projectItem.type === 1 // CLIP, BIN, ROOT, or FILE
         && projectItem.isSequence()) {
         var sequence = projectItemToSequence(projectItem);
-        var sequenceIndex = projectItemToSequenceIndex(projectItem);
         app.trace(sequence.name);
         var videoTrack = sequence.videoTracks[0]
         var clip = videoTrack.clips[0]
         var components = clip.components;
         //components[0].displayName
 
-        var qsequence = qe.project.getSequenceAt(sequenceIndex)
+        var qsequence = sequenceToQSequence(sequence);
         var qclip = qsequence.getVideoTrackAt(0).getItemAt(0)
 
         var effectComponent = getComponentByDisplayName(components, effectName)
 
         if (!effectComponent) { // Add effect it not exists
-            //qe.project.getVideoEffectList()
+            qe.project.getVideoEffectList()
             var effect = qe.project.getVideoEffectByName(effectName)
             if (!effect.name) throw "Effect now found: " + effectName;
             app.trace(effect.name)
             qclip.addVideoEffect(effect)
+            sequence.projectItem.setColorLabel(colorLabelEffectAdded)
 
             effectComponent = getComponentByDisplayName(components, effectName)
         }
 
         applyEffectProperties(effectComponent)
 
-        // TODO: wait for 
-        var done = sequence.isDoneAnalyzingForVideoEffects()
-        
-        var a = 1;
+        sequence.projectItem.setColorLabel(colorLabelEffectConfigured);
+
+        do {
+            $.sleep(1000);
+        } while (!sequence.isDoneAnalyzingForVideoEffects());
+
+        sequence.projectItem.setColorLabel(colorLabelEffectAnalyzed);
     }
 
 }
@@ -62,10 +73,11 @@ function projectItemToSequence(projectItem) {
     return null;
 }
 
-function projectItemToSequenceIndex(projectItem) {
-    for (var i = 0; i < app.project.sequences.numSequences; i++) {
-        if (projectItem.nodeId === app.project.sequences[i].projectItem.nodeId) {
-            return i;
+function sequenceToQSequence(sequence) {
+    for (var i = 0; i < qe.project.numSequences; i++) {
+        var qsequence = qe.project.getSequenceAt(i);
+        if (qsequence.guid === sequence.sequenceID) {
+            return qsequence;
         }
     }
     return null;
@@ -82,6 +94,7 @@ function getComponentByDisplayName(components, name) {
 }
 
 function applyEffectProperties(component) {
+    if (!component) return;
     for (var i = 0; i < component.properties.length; i++) {
         var property = component.properties[i];
         switch (property.displayName) {
