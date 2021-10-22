@@ -7,13 +7,15 @@
 app.enableQE()
 
 var outputDirectory = new File("h:\\Pictures\\tag\\stabilized\\");
+//var outputDirectory  = Folder.selectDialog("Export to this folder");
+var presetName = "Copy of Match Source - High bitrate - Canon";
 
 if (!outputDirectory.exists) throw "Directory " + outputDirectory + " does not exist";
 
 // Standard presets path : C:\\Program Files\\Adobe\\Adobe Premiere Pro 2021\\Settings\\IngestPresets\\Transcode\\
 // Custom presets path   : D:\\Documents\\Adobe\\Adobe Media Encoder\\15.0\\Presets\\
 //var encoderPresetFile = new File("C:\\Program Files\\Adobe\\Adobe Premiere Pro 2021\\Settings\\IngestPresets\\Transcode\\Match Source - H.264 High Bitrate.epr")
-var encoderPresetFile = new File("D:\\Documents\\Adobe\\Adobe Media Encoder\\15.0\\Presets\\Copy of Match Source - High bitrate - Canon.epr")
+var encoderPresetFile = new File("D:\\Documents\\Adobe\\Adobe Media Encoder\\15.0\\Presets\\" + presetName + ".epr")
 if (!encoderPresetFile.exists) throw "Encoder preset " + encoderPresetPath + " does not exist"
 
 app.encoder.launchEncoder()
@@ -32,8 +34,6 @@ var colorLabelExiftoolApplied = 2; // Carribean
 // 2 - onEncoderJobQueued
 // 3 - onEncoderJobError
 var asyncStep = 0; 
-
-//var outputPath  = Folder.selectDialog("That's how you choose directory");
 
 for (var i = 0; i < projectItems.length; i++) {
     var projectItem = projectItems[i];

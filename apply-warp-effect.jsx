@@ -9,15 +9,15 @@
 //https://github.com/yearbook/yearbook.github.io/blob/master/esdocs/source/Premiere/classes/QEProject.json - parameters
 
 var effectName = "Warp Stabilizer" // Sadly cannot be a preset name
+var smoothness = 9;
+var cropLessSmoothMore = 10;
 
-app.setSDKEventMessage("hello", "info");
+app.enableQE();
 
-app.enableQE()
+var project = app.project;
+var projectItems = app.getCurrentProjectViewSelection();
 
-var project = app.project
-var projectItems = app.getCurrentProjectViewSelection()
-
-if (!projectItems) throw "Please select some sequences"
+if (!projectItems) throw "Please select some sequences";
 
 var colorLabelEffectAdded = 7; // dark yellow
 var colorLabelEffectConfigured = 12; // biege
@@ -36,22 +36,22 @@ for (var i = 0; i < projectItems.length; i++) {
         //components[0].displayName
 
         var qsequence = sequenceToQSequence(sequence);
-        var qclip = qsequence.getVideoTrackAt(0).getItemAt(0)
+        var qclip = qsequence.getVideoTrackAt(0).getItemAt(0);
 
-        var effectComponent = getComponentByDisplayName(components, effectName)
+        var effectComponent = getComponentByDisplayName(components, effectName);
 
         if (!effectComponent) { // Add effect it not exists
             qe.project.getVideoEffectList()
-            var effect = qe.project.getVideoEffectByName(effectName)
+            var effect = qe.project.getVideoEffectByName(effectName);
             if (!effect.name) throw "Effect now found: " + effectName;
-            app.trace(effect.name)
-            qclip.addVideoEffect(effect)
-            sequence.projectItem.setColorLabel(colorLabelEffectAdded)
+            app.trace(effect.name);
+            qclip.addVideoEffect(effect);
+            sequence.projectItem.setColorLabel(colorLabelEffectAdded);
 
-            effectComponent = getComponentByDisplayName(components, effectName)
+            effectComponent = getComponentByDisplayName(components, effectName);
         }
 
-        applyEffectProperties(effectComponent)
+        applyEffectProperties(effectComponent);
 
         sequence.projectItem.setColorLabel(colorLabelEffectConfigured);
 
@@ -105,10 +105,10 @@ function applyEffectProperties(component) {
         var property = component.properties[i];
         switch (property.displayName) {
             case "Smoothness":
-                property.setValue(9, 1); // 1 means update gui
+                property.setValue(smoothness, 1); // 1 means update gui
                 break;
             case "Crop Less <-> Smooth More":
-                property.setValue(10, 1); // 1 means update gui
+                property.setValue(cropLessSmoothMore, 1); // 1 means update gui
                 break;
         }
     }
