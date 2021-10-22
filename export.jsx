@@ -2,6 +2,7 @@
 // https://github.com/Adobe-CEP/Samples/blob/master/PProPanel/jsx/PPRO/Premiere.jsx
 // This process will create a lot of .prproj files in c:\Users\roman\AppData\Local\Temp\
 // Requires exiftool to be evailable in Path
+// https://github.com/bbb999/Types-for-Adobe/blob/master/Premiere/2018/index.d.ts
 
 app.enableQE()
 
@@ -96,6 +97,8 @@ for (var i = 0; i < projectItems.length; i++) {
     encoderPresetFile.close()
 
 }
+
+app.setSDKEventMessage("Done", "info");
 
 function projectItemToSequence(projectItem) {
     for (var i = 0; i < app.project.sequences.numSequences; i++) {

@@ -68,6 +68,8 @@ for (var i = 0; i < projectItems.length; i++) {
 
 }
 
+app.setSDKEventMessage("Done", "info");
+
 function projectItemToSequence(projectItem) {
     for (var i = 0; i < app.project.sequences.numSequences; i++) {
         if (projectItem.nodeId === app.project.sequences[i].projectItem.nodeId) {

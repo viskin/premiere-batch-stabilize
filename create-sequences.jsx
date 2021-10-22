@@ -16,3 +16,5 @@ for (var i = 0; i < projectItems.length; i++) {
         project.createNewSequenceFromClips(projectItem.name, [projectItem])
     }
 }
+
+app.setSDKEventMessage("Done", "info");
