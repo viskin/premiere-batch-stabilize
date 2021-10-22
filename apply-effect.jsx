@@ -17,11 +17,11 @@ app.enableQE()
 var project = app.project
 var projectItems = app.getCurrentProjectViewSelection()
 
+if (!projectItems) throw "Please select some sequences"
+
 var colorLabelEffectAdded = 7; // dark yellow
 var colorLabelEffectConfigured = 12; // biege
 var colorLabelEffectAnalyzed = 10; // dark green
-
-if (!projectItems) throw "Please select some sequences"
 
 for (var i = 0; i < projectItems.length; i++) {
     var projectItem = projectItems[i];
@@ -55,9 +55,13 @@ for (var i = 0; i < projectItems.length; i++) {
 
         sequence.projectItem.setColorLabel(colorLabelEffectConfigured);
 
+        app.setSDKEventMessage("Started " + effectName + " to " + sequence.name , "info");
+
         do {
             $.sleep(1000);
         } while (!sequence.isDoneAnalyzingForVideoEffects());
+
+        app.setSDKEventMessage("Completed " + effectName + " to " + sequence.name , "info");
 
         sequence.projectItem.setColorLabel(colorLabelEffectAnalyzed);
     }

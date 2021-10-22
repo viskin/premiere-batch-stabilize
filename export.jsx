@@ -1,9 +1,12 @@
 // https://ppro-scripting.docsforadobe.dev/general/encoder.html
 // https://github.com/Adobe-CEP/Samples/blob/master/PProPanel/jsx/PPRO/Premiere.jsx
+// This process will create a lot of .prproj files in c:\Users\roman\AppData\Local\Temp\
+// Requires exiftool to be evailable in Path
 
 app.enableQE()
 
-var outputDirectory = new File("E:\\dev\\AdobePremiere\\Test1\\render\\");
+var outputDirectory = new File("h:\\Pictures\\tag\\stabilized\\");
+
 if (!outputDirectory.exists) throw "Directory " + outputDirectory + " does not exist";
 
 // Standard presets path : C:\\Program Files\\Adobe\\Adobe Premiere Pro 2021\\Settings\\IngestPresets\\Transcode\\
@@ -17,7 +20,17 @@ app.encoder.launchEncoder()
 var project = app.project
 var projectItems = app.getCurrentProjectViewSelection()
 
-if (!projectItem) throw "Please select some sequences"
+if (!projectItems) throw "Please select some sequences"
+
+var colorLabelExportStarted = 3; // Lavander
+var colorLabelExportCompleted = 14; // Cerulean (light blue)
+var colorLabelExiftoolApplied = 2; // Carribean
+
+// 0 - started
+// 1 - onEncoderJobComplete
+// 2 - onEncoderJobQueued
+// 3 - onEncoderJobError
+var asyncStep = 0; 
 
 //var outputPath  = Folder.selectDialog("That's how you choose directory");
 
@@ -28,11 +41,10 @@ for (var i = 0; i < projectItems.length; i++) {
         && projectItem.isSequence()) {
         var sequence = projectItemToSequence(projectItem);
         var videoTrack = sequence.videoTracks[0]
-        app.setSDKEventMessage('Here is some information.', 'info');
         var clip = videoTrack.clips[0]
 
         app.encoder.setEmbeddedXMPEnabled(1)
-        app.encoder.setEmbeddedXMPEnabled(1)
+        app.encoder.setSidecarXMPEnabled(1)
         
         //var modifiedPresetFile = new File("E:\\dev\\AdobePremiere\\Test1\\preset.epr");
         //var encoderPreset = app.encoder.getPresetObject(encoderPresetFile.fsName);
@@ -49,9 +61,13 @@ for (var i = 0; i < projectItems.length; i++) {
         //     encoderPresetFile.fsName,
         //      app.encoder.ENCODE_ENTIRE);
 
-        app.encoder.bind('onEncoderJobComplete', function (jobID, outputFilePath) { onEncoderJobComplete2(jobID, outputFilePath, inputPath) });
+        app.encoder.bind('onEncoderJobComplete', function (jobID, outputFilePath) { onEncoderJobComplete2(jobID, outputFilePath, inputPath, sequence) });
         app.encoder.bind('onEncoderJobQueued', onEncoderJobQueued);
         app.encoder.bind('onEncoderJobError', onEncoderJobError);
+
+        asyncStep = 0;
+
+        app.setSDKEventMessage("Exporting " + sequence.name, "info");
 
         // https://ppro-scripting.docsforadobe.dev/general/encoder.html?highlight=encodesequence
         var jobId = app.encoder.encodeSequence(
@@ -64,7 +80,17 @@ for (var i = 0; i < projectItems.length; i++) {
         
         if (jobId === 0) throw "encodeSequence returned 0"
 
-        //app.encoder.startBatch()
+        sequence.projectItem.setColorLabel(colorLabelExportStarted)
+
+        app.encoder.startBatch()
+        
+        while (asyncStep === 0) {
+            $.sleep(1000);
+        }
+
+        app.encoder.unbind('onEncoderJobComplete');
+        app.encoder.unbind('onEncoderJobQueued');
+        app.encoder.unbind('onEncoderJobError');
     }
 
     encoderPresetFile.close()
@@ -85,8 +111,12 @@ function onEncoderJobQueued (jobID) {
 }
 
 // onEncoderJobComplete with inputPath parameter
-function onEncoderJobComplete2(jobID, outputFilePath, inputPath) {
-    copyMetadata(inputPath, outputFilePath);
+function onEncoderJobComplete2(jobID, outputFilePath, inputPath, sequence) {
+    sequence.projectItem.setColorLabel(colorLabelExportCompleted);
+    var result = copyMetadata(inputPath, outputFilePath);
+    if (result) sequence.projectItem.setColorLabel(colorLabelExiftoolApplied);
+
+    asyncStep = 2;
 }
 
 function onEncoderJobError (jobID, errorMessage) {
@@ -104,6 +134,8 @@ function onEncoderJobError (jobID, errorMessage) {
     eventObj.type	= "com.adobe.csxs.events.PProPanelRenderEvent";
     eventObj.data	= "Job " + jobID + " failed, due to " + errorMessage + ".";
     eventObj.dispatch();
+
+    asyncStep = 3;
 }
 
 function run(cmd) {
@@ -112,8 +144,8 @@ function run(cmd) {
     f.open("w");
     f.writeln("chcp 65001\n" + cmd /*+ "\npause"*/);
     f.close();
-    f.execute();
-    //f.remove();
+    return f.execute();
+    //f.remove(); // TODO: should wait for execute to finish
 }
 
 // JS - Generate Global Random Unique Number
@@ -134,11 +166,11 @@ function runExifTool(args) {
     f.open("w");
     f.writeln(args);
     f.close();
-    run("exiftool -@ " + f.fsName)
+    return run("exiftool -@ " + f.fsName)
 }
 
 // supports unicode filenames
 function copyMetadata(source, target) {
     //run("exiftool -tagsfromfile \"" + source + "\" \"" + target + "\" -overwrite_original -charset filename=utf8");
-    runExifTool("-tagsfromfile\n" + source + "\n" + target + "\n-overwrite_original\n-charset\nfilename=utf8")
+    return runExifTool("-tagsfromfile\n" + source + "\n" + target + "\n-overwrite_original\n-charset\nfilename=utf8")
 }
