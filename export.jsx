@@ -175,5 +175,5 @@ function runExifTool(args) {
 // supports unicode filenames
 function copyMetadata(source, target) {
     //run("exiftool -tagsfromfile \"" + source + "\" \"" + target + "\" -overwrite_original -charset filename=utf8");
-    return runExifTool("-tagsfromfile\n" + source + "\n" + target + "\n-overwrite_original\n-charset\nfilename=utf8")
+    return runExifTool("-api\nlargefilesupport=1\n-tagsfromfile\n" + source + "\n" + target + "\n-overwrite_original\n-charset\nfilename=utf8")
 }
