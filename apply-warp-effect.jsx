@@ -8,6 +8,8 @@
 //https://github.com/qmasingarbe/pymiere/blob/master/example_and_documentation.md - how to export
 //https://github.com/yearbook/yearbook.github.io/blob/master/esdocs/source/Premiere/classes/QEProject.json - parameters
 
+//@include "common.jsx"
+
 var effectName = "Warp Stabilizer" // Sadly cannot be a preset name
 var smoothness = 9;
 var cropLessSmoothMore = 10;
@@ -84,16 +86,6 @@ function sequenceToQSequence(sequence) {
         var qsequence = qe.project.getSequenceAt(i);
         if (qsequence.guid === sequence.sequenceID) {
             return qsequence;
-        }
-    }
-    return null;
-}
-
-function getComponentByDisplayName(components, name) {
-    for (var i = 0; i < components.length; i++) {
-        var component = components[i];
-        if (name === component.displayName) {
-            return component;
         }
     }
     return null;
