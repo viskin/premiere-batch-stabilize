@@ -5,8 +5,8 @@
 
 //@include "common.jsx"
 
-var zoom = 1.1;
-var zoomIn = true;
+var zoom = 1.05; // > 1.0
+var zoomIn = false;
 // setInterpolationTypeAtKey does not work for some reason
 //var interpolationType = 5; // 5 = kfInterpMode_Bezier
 
@@ -39,24 +39,11 @@ var scaleParam = getComponentParamByDisplayName(motionComponent.properties, "Sca
 if (!scaleParam.areKeyframesSupported()) throw "Keyframes are not supported for parameter " + scaleParam.displayName + " of component " + motionComponent.displayName;
 
 var scale1 = scaleParam.getValue();
-var scale2 = scale1 * zoom;
-if (scale1 > scale2) {
-    if (zoomIn) {
-        var tmp = scale2;
-        scale2 = scale1;
-        scale1 = tmp;
-    }
-} else if (scale1 < scale2) {
-    if (!zoomIn) {
-        var tmp = scale2;
-        scale2 = scale1;
-        scale1 = tmp;
-    }
-}
+var scale2 = zoomIn ? scale1 * zoom : scale1 / zoom;
+
 var time1 = clip.inPoint;
-var time2 = clip.outPoint;
-//time1.seconds = 3601.06413333333;
-//time2.seconds = 3601.7982;
+var time2 = new Time();
+time2.seconds = clip.outPoint.seconds - 0.0000001; // to make video frame visible
 
 scaleParam.setTimeVarying(true, 1);
 
@@ -67,6 +54,8 @@ scaleParam.setValueAtKey(time1, scale1, 1); // 1 means updateUI
 scaleParam.addKey(time2, 1);
 scaleParam.setValueAtKey(time2, scale2, 1); // 1 means updateUI
 //scaleParam.setInterpolationTypeAtKey(time2, interpolationType, 1)
+
+app.setSDKEventMessage("Scale effect applied to " + clip.name, "info");
 
 function getSelectedClips(clips) {
     return clips.filter(function (clip) { return clip.isSelected() });
