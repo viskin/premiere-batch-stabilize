@@ -2,6 +2,8 @@
 
 This script allowed me to create automatic stabilization pipeline with Adobe Premiere.
 
+As a bonus, it uses exiftool to copy all the metadata Adobe Premiere fails to copy to the stabilized video.
+
 ## Preparation
 
 Tested on Windows.
