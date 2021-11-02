@@ -26,37 +26,41 @@ for (var trackIndex = 0; trackIndex < videoTracks.numTracks; trackIndex++) {
     selectedClips.push.apply(selectedClips, getSelectedClips(clips));
 }
 
-if (selectedClips.length != 1) throw "Please select exactly one clip";
+if (selectedClips.length == 0) throw "Please select some clips";
 
-var clip = selectedClips[0];
-var track = getTrackOfClip(videoTracks, clip);
-var transitions = track.transitions;
-var components = clip.components;
+for (var clipIndex = 0; clipIndex < selectedClips.length; clipIndex++) {
+    
+    var clip = selectedClips[clipIndex];
 
-var motionComponent = getComponentByDisplayName(components, "Motion");
+    var track = getTrackOfClip(videoTracks, clip);
+    var transitions = track.transitions;
+    var components = clip.components;
 
-var scaleParam = getComponentParamByDisplayName(motionComponent.properties, "Scale");
-if (!scaleParam.areKeyframesSupported()) throw "Keyframes are not supported for parameter " + scaleParam.displayName + " of component " + motionComponent.displayName;
+    var motionComponent = getComponentByDisplayName(components, "Motion");
 
-var scale1 = scaleParam.getValue();
-var scale2 = zoomIn ? scale1 * zoom : scale1 / zoom;
+    var scaleParam = getComponentParamByDisplayName(motionComponent.properties, "Scale");
+    if (!scaleParam.areKeyframesSupported()) throw "Keyframes are not supported for parameter " + scaleParam.displayName + " of component " + motionComponent.displayName;
 
-var time1 = clip.inPoint;
-var time2 = new Time();
-time2.seconds = clip.outPoint.seconds - 0.0000001; // to make video frame visible
+    var scale1 = zoomIn ? scaleParam.getValue() : scaleParam.getValue() * zoom;
+    var scale2 = zoomIn ? scale1 * zoom : scale1 / zoom;
 
-scaleParam.setTimeVarying(true, 1);
+    var time1 = clip.inPoint;
+    var time2 = new Time();
+    time2.seconds = clip.outPoint.seconds - 0.0000001; // to make video frame visible
 
-scaleParam.addKey(time1, 1);
-scaleParam.setValueAtKey(time1, scale1, 1); // 1 means updateUI
-//scaleParam.setInterpolationTypeAtKey(time1, interpolationType, 1)
+    scaleParam.setTimeVarying(true, 1);
 
-scaleParam.addKey(time2, 1);
-scaleParam.setValueAtKey(time2, scale2, 1); // 1 means updateUI
-//scaleParam.setInterpolationTypeAtKey(time2, interpolationType, 1)
+    scaleParam.addKey(time1, 1);
+    scaleParam.setValueAtKey(time1, scale1, 1); // 1 means updateUI
+    //scaleParam.setInterpolationTypeAtKey(time1, interpolationType, 1)
 
-app.setSDKEventMessage("Scale effect applied to " + clip.name, "info");
+    scaleParam.addKey(time2, 1);
+    scaleParam.setValueAtKey(time2, scale2, 1); // 1 means updateUI
+    //scaleParam.setInterpolationTypeAtKey(time2, interpolationType, 1)
 
+    app.setSDKEventMessage("Scale effect applied to " + clip.name, "info");
+}
+    
 function getSelectedClips(clips) {
     return clips.filter(function (clip) { return clip.isSelected() });
 }
