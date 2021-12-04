@@ -169,11 +169,11 @@ function runExifTool(args) {
     f.open("w");
     f.writeln(args);
     f.close();
-    return run("exiftool -@ " + f.fsName)
+    return run("exiftool -charset filename=utf8 -@ " + f.fsName);
 }
 
 // supports unicode filenames
 function copyMetadata(source, target) {
     //run("exiftool -tagsfromfile \"" + source + "\" \"" + target + "\" -overwrite_original -charset filename=utf8");
-    return runExifTool("-api\nlargefilesupport=1\n-tagsfromfile\n" + source + "\n" + target + "\n-overwrite_original\n-charset\nfilename=utf8")
+    return runExifTool("-api\nlargefilesupport=1\n-tagsfromfile\n" + source + "\n" + target + "\n-overwrite_original");
 }
