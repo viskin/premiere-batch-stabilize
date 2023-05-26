@@ -25,7 +25,7 @@ You will need
     - Run `apply-warp-effect.jsx`
     - You can customize smoothness and cropLessSmoothMore of Warp Stabilizer effect by modifying the script
     - On each starge, color label of the sequence will be modified for convenience, as process can take long, and can fail in the middle
-- Now as the effect applied, we want to export all the sequences
+- As the effect applied, we want to export all the sequences
     - Create a preset for export, e.g. "Copy of Match Source - High bitrate - Canon"
     - The script will only work with custom preset, so make sure the path in the script defined in `encoderPresetFile` is correct
     - Select needed sequences
