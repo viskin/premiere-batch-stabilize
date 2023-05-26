@@ -83,7 +83,7 @@ function projectItemToSequence(projectItem) {
 
 function sequenceToQSequence(sequence) {
     for (var i = 0; i < qe.project.numSequences; i++) {
-        var qsequence = qe.project.getSequenceAt(i);
+        var qsequence = qe.project.getBinAt(0).getSequenceAt(i);
         if (qsequence.guid === sequence.sequenceID) {
             return qsequence;
         }
