@@ -1,4 +1,7 @@
 // Adds zoom effect to selected clip
+// Useful for blinging life to photo still.
+// Set zoomIn to true, false or null (random).
+// Select some clips, and run the script.
 
 // https://ppro-scripting.docsforadobe.dev/
 // https://github.com/Adobe-CEP/Samples/blob/master/PProPanel/jsx/PPRO/Premiere.jsx
@@ -6,9 +9,8 @@
 //@include "common.jsx"
 
 var zoom = 1.05; // > 1.0
-var zoomIn = false;
-// setInterpolationTypeAtKey does not work for some reason
-//var interpolationType = 5; // 5 = kfInterpMode_Bezier
+var zoomIn = null; // true, false or null. null means random
+var interpolationType = 5; // 5 = kfInterpMode_Bezier
 
 var project = app.project;
 
@@ -41,8 +43,9 @@ for (var clipIndex = 0; clipIndex < selectedClips.length; clipIndex++) {
     var scaleParam = getComponentParamByDisplayName(motionComponent.properties, "Scale");
     if (!scaleParam.areKeyframesSupported()) throw "Keyframes are not supported for parameter " + scaleParam.displayName + " of component " + motionComponent.displayName;
 
-    var scale1 = zoomIn ? scaleParam.getValue() : scaleParam.getValue() * zoom;
-    var scale2 = zoomIn ? scale1 * zoom : scale1 / zoom;
+    var currentZoomIn = zoomIn === null ? Math.random() < 0.5 : zoomIn;
+    var scale1 = currentZoomIn ? scaleParam.getValue() : scaleParam.getValue() * zoom;
+    var scale2 = currentZoomIn                ? scale1 * zoom : scale1 / zoom;
 
     var time1 = clip.inPoint;
     var time2 = new Time();
@@ -52,11 +55,11 @@ for (var clipIndex = 0; clipIndex < selectedClips.length; clipIndex++) {
 
     scaleParam.addKey(time1, 1);
     scaleParam.setValueAtKey(time1, scale1, 1); // 1 means updateUI
-    //scaleParam.setInterpolationTypeAtKey(time1, interpolationType, 1)
+    scaleParam.setInterpolationTypeAtKey(time1, interpolationType, 1)
 
     scaleParam.addKey(time2, 1);
     scaleParam.setValueAtKey(time2, scale2, 1); // 1 means updateUI
-    //scaleParam.setInterpolationTypeAtKey(time2, interpolationType, 1)
+    scaleParam.setInterpolationTypeAtKey(time2, interpolationType, 1)
 
     app.setSDKEventMessage("Scale effect applied to " + clip.name, "info");
 }
