@@ -1,7 +1,7 @@
 // Creates sequences for all selected project files
 // https://ppro-scripting.docsforadobe.dev/
 
-var targetBinName = "stabilize"; // empty string for none
+var targetBinName = ""; // empty string for none. Better keep it this way to prevent issues with apply-warp-effect.jsx
 
 var project = app.project;
 

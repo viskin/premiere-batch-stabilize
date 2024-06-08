@@ -16,6 +16,7 @@ You will need
 
 - Create new Premiere project
 - Drag some movie files to the project
+- As workaround for ExtendScript bug, move added movies to a folder
 - Now you need to create a sequence for each move
     - Select needed movies in project panel
     - Run `create-sequences.jsx`
