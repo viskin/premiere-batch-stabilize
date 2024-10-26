@@ -68,6 +68,8 @@ for (var i = 0; i < projectItems.length; i++) {
         sequence.projectItem.setColorLabel(colorLabelEffectAnalyzed);
     }
 
+    app.project.save();
+
 }
 
 app.setSDKEventMessage("Done", "info");
